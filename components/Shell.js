@@ -51,7 +51,19 @@ const supplierNavigationSections = [
 export default function Shell({ children }) {
   const currentPath = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace(`/login?from=${encodeURIComponent(currentPath)}`);
+    }
+  }, [isLoading, isAuthenticated, currentPath, router]);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user?.role === "SUPPLIER" && !currentPath.startsWith("/supplier")) {
+      router.replace("/supplier");
+    }
+  }, [isLoading, isAuthenticated, user, currentPath, router]);
 
   const isSupplier = user?.role === "SUPPLIER";
   const activeNavigationSections = isSupplier
@@ -74,6 +86,55 @@ export default function Shell({ children }) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0b0f19",
+          color: "#f8fafc",
+          fontFamily: "var(--font-outfit), sans-serif",
+        }}
+      >
+        <div
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 14,
+            background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24,
+            fontWeight: 800,
+            color: "#fff",
+            marginBottom: 16,
+            boxShadow: "0 10px 25px rgba(59, 130, 246, 0.35)",
+          }}
+        >
+          P
+        </div>
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            letterSpacing: "0.02em",
+            color: "#f1f5f9",
+          }}
+        >
+          PDV Material Management
+        </div>
+        <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 6 }}>
+          Checking authentication & redirecting to login...
+        </div>
+      </div>
+    );
+  }
 
   // Find current active page title
   let pageTitle = isSupplier ? "Supplier Portal" : "Dashboard";

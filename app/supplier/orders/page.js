@@ -584,16 +584,6 @@ export default function SupplierOrdersPage() {
               }}
             >
               <div className="modalBody">
-                <div className="fixedPriceNotice">
-                  <div className="fixedPriceNoticeIcon">🔒</div>
-                  <div className="fixedPriceNoticeContent">
-                    <div className="fixedPriceNoticeTitle">Fixed Inventory Pricing Policy</div>
-                    <div className="fixedPriceNoticeDesc">
-                      Material rates and units are governed directly by Admin in Inventory Master. When selecting an item, its fixed unit rate is locked in. Enter only your intended supply quantity.
-                    </div>
-                  </div>
-                </div>
-
                 <div className="formRowGrid">
                   <div>
                     <label className="fieldLabel">Order Reference #</label>
@@ -729,33 +719,36 @@ export default function SupplierOrdersPage() {
                   <div className="mobileLineItemsList">
                     {lineItems.map((item, idx) => (
                       <div key={idx} className="mobileLineItemCard">
-                        <div className="mobileLineItemCardHeader">
-                          <div className="mobileLineItemIndexBadge">#{idx + 1}</div>
-                          <div className="mobileLineItemTitleWrap">
-                            <label className="mobileLineItemFieldLabel">Select Material</label>
-                            <select
-                              className="fieldInput mobileSelectInput"
-                              value={item.materialName}
-                              onChange={(e) => handleUpdateLineItem(idx, "materialName", e.target.value)}
-                            >
-                              {materialCatalog.map((m, mIdx) => (
-                                <option key={mIdx} value={m.name}>
-                                  {m.name} ({m.unit} • ₹{m.rate})
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                        {/* Top Bar with Badge and Delete Button */}
+                        <div className="mobileLineItemTopBar">
+                          <span className="mobileLineItemBadge">Item #{idx + 1}</span>
                           {lineItems.length > 1 && (
                             <button
                               type="button"
-                              className="mobileLineItemDeleteBtn"
+                              className="mobileLineItemRemoveBtn"
                               title="Remove item"
                               aria-label="Remove item"
                               onClick={() => handleRemoveLineItem(idx)}
                             >
-                              ✕
+                              ✕ Remove
                             </button>
                           )}
+                        </div>
+
+                        {/* Full Width Material Selector */}
+                        <div className="mobileMaterialSelectWrap">
+                          <label className="mobileLineItemFieldLabel">Select Material</label>
+                          <select
+                            className="fieldInput mobileSelectInput"
+                            value={item.materialName}
+                            onChange={(e) => handleUpdateLineItem(idx, "materialName", e.target.value)}
+                          >
+                            {materialCatalog.map((m, mIdx) => (
+                              <option key={mIdx} value={m.name}>
+                                {m.name} ({m.unit} • ₹{m.rate})
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         <div className="mobileLineItemCardBody">
@@ -832,13 +825,14 @@ export default function SupplierOrdersPage() {
               <div className="modalFooter">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary modalCancelBtn"
                   onClick={() => setIsCreateModalOpen(false)}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Submit Order to PDV Operations
+                <button type="submit" className="btn btn-primary modalSubmitBtn">
+                  <span className="submitTextFull">Submit Order to PDV Operations</span>
+                  <span className="submitTextShort">Submit Order</span>
                 </button>
               </div>
             </form>

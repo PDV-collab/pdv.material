@@ -6,11 +6,6 @@ import Shell from "@/components/Shell";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { getStorageData, STORAGE_KEYS } from "@/lib/dataService";
-import {
-  syncSupplierGoogleSheet,
-  getSupplierSheetUrl,
-  saveSupplierSheetUrl,
-} from "@/google_sheets_sync/syncClient";
 import "./supplier.css";
 
 export default function SupplierDashboardPage() {
@@ -23,11 +18,6 @@ export default function SupplierDashboardPage() {
     products: [],
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [sheetUrl, setSheetUrl] = useState("");
-  const [isEditingSheet, setIsEditingSheet] = useState(false);
-  const [sheetInput, setSheetInput] = useState("");
-  const [syncLoading, setSyncLoading] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState({ type: "", text: "" });
 
   // Load server-isolated data for this authenticated supplier
   useEffect(() => {
@@ -67,11 +57,6 @@ export default function SupplierDashboardPage() {
     }
 
     loadData();
-
-    const code = user?.supplierCode || "SUP-001";
-    const existingSheet = getSupplierSheetUrl(code);
-    setSheetUrl(existingSheet);
-    setSheetInput(existingSheet);
   }, [user]);
 
   const { purchases, bills, profile } = supplierData;
@@ -94,37 +79,7 @@ export default function SupplierDashboardPage() {
   const companyName = profile?.companyName || user?.supplierName || "Supplier Workspace";
   const supplierCode = profile?.code || user?.supplierCode || "SUP-001";
 
-  const handleSaveSheet = (e) => {
-    e.preventDefault();
-    saveSupplierSheetUrl(supplierCode, sheetInput);
-    setSheetUrl(sheetInput);
-    setIsEditingSheet(false);
-    setSyncFeedback({ type: "success", text: "Supplier Google Sheet connection saved." });
-  };
 
-  const handleSyncMySheet = async () => {
-    if (!sheetUrl) {
-      setIsEditingSheet(true);
-      return;
-    }
-
-    setSyncLoading(true);
-    setSyncFeedback({ type: "info", text: "Synchronizing your purchase orders and invoices..." });
-    try {
-      const res = await syncSupplierGoogleSheet(supplierCode, companyName);
-      setSyncFeedback({
-        type: "success",
-        text: `✓ Google Sheet Synced! ${res.totalReceived} records processed (${res.totalAdded} added, ${res.totalUpdated} updated) with zero duplicates.`,
-      });
-    } catch (err) {
-      setSyncFeedback({
-        type: "error",
-        text: `Sync error: ${err.message}`,
-      });
-    } finally {
-      setSyncLoading(false);
-    }
-  };
 
   return (
     <Shell>
@@ -147,84 +102,7 @@ export default function SupplierDashboardPage() {
         </div>
       </div>
 
-      {/* 2. Compact Google Sheet Sync Bar */}
-      <div className="sheetSyncCard">
-        <div className="sheetSyncLeft">
-          <div className="sheetSyncTitleRow">
-            <h3>Google Sheet Sync</h3>
-            {sheetUrl ? (
-              <span className="sheetStatusPill connected">● Connected</span>
-            ) : (
-              <span className="sheetStatusPill pending">○ Not Connected</span>
-            )}
-          </div>
-          <p>Sync your purchase orders directly to your private Google Sheet.</p>
-        </div>
 
-        <div className="sheetSyncActions">
-          <button
-            type="button"
-            className="btn btn-sm btn-secondary"
-            onClick={() => setIsEditingSheet(!isEditingSheet)}
-          >
-            ⚙ {sheetUrl ? "Change Link" : "Connect Sheet"}
-          </button>
-          {sheetUrl && (
-            <a
-              href={sheetUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-sm btn-secondary"
-              style={{ textDecoration: "none" }}
-            >
-              ↗ Open Sheet
-            </a>
-          )}
-          <button
-            type="button"
-            className="btn btn-sm btn-primary"
-            disabled={syncLoading || !sheetUrl}
-            onClick={handleSyncMySheet}
-          >
-            {syncLoading ? "Syncing..." : "⚡ Sync Now"}
-          </button>
-        </div>
-      </div>
-
-      {isEditingSheet && (
-        <form onSubmit={handleSaveSheet} className="sheetEditForm">
-          <label style={{ flex: "1 1 280px", fontSize: "12px", fontWeight: "600" }}>
-            Google Spreadsheet URL:
-            <input
-              type="url"
-              required
-              placeholder="https://docs.google.com/spreadsheets/d/.../edit"
-              style={{ width: "100%", marginTop: "4px", padding: "7px 10px", fontSize: "13px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
-              value={sheetInput}
-              onChange={(e) => setSheetInput(e.target.value)}
-            />
-          </label>
-          <button type="submit" className="btn btn-sm btn-primary">Save</button>
-          <button type="button" className="btn btn-sm btn-secondary" onClick={() => setIsEditingSheet(false)}>Cancel</button>
-        </form>
-      )}
-
-      {syncFeedback.text && (
-        <div
-          style={{
-            padding: "10px 14px",
-            borderRadius: "8px",
-            fontSize: "13px",
-            fontWeight: "600",
-            marginBottom: "16px",
-            background: syncFeedback.type === "success" ? "#ecfdf5" : syncFeedback.type === "error" ? "#fef2f2" : "#eff6ff",
-            color: syncFeedback.type === "success" ? "#065f46" : syncFeedback.type === "error" ? "#991b1b" : "#1e40af",
-            border: `1px solid ${syncFeedback.type === "success" ? "#a7f3d0" : syncFeedback.type === "error" ? "#fecaca" : "#bfdbfe"}`,
-          }}
-        >
-          {syncFeedback.text}
-        </div>
-      )}
 
       {/* 3. Clean Metrics Grid */}
       <div className="supplierMetricsGrid">

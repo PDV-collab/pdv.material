@@ -10,7 +10,6 @@ import {
   setStorageData,
   STORAGE_KEYS,
 } from "@/lib/dataService";
-import History from "./History";
 import "@/components/ui/ui.css";
 import "./consumption.css";
 
@@ -405,9 +404,6 @@ export default function ConsumptionForm() {
           </div>
         </section>
       </form>
-
-      {/* Consumption History Table */}
-      <History kind="consumption" title="Site Consumption History" refreshTrigger={reloadKey} />
     </Shell>
   );
 }

@@ -44,77 +44,6 @@
   border: 1px solid #cbd5e1;
 }
 
-/* Sheet Sync Compact Card */
-.sheetSyncCard {
-  background: white;
-  border: 1px solid var(--border-default, #e2e8f0);
-  border-radius: 12px;
-  padding: 14px 20px;
-  margin-bottom: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-}
-
-.sheetSyncTitleRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sheetSyncTitleRow h3 {
-  font-size: 14px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-.sheetSyncLeft p {
-  font-size: 12.5px;
-  color: #64748b;
-  margin: 3px 0 0;
-}
-
-.sheetStatusPill {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
-}
-
-.sheetStatusPill.connected {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.sheetStatusPill.pending {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fde68a;
-}
-
-.sheetSyncActions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.sheetEditForm {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  background: #f8fafc;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 18px;
-}
 
 /* Metric Cards */
 .supplierMetricsGrid {
@@ -585,6 +514,14 @@
   color: #1e3a8a;
 }
 
+.submitTextFull {
+  display: inline;
+}
+
+.submitTextShort {
+  display: none;
+}
+
 .mobileLineItemsList {
   display: none;
 }
@@ -594,6 +531,43 @@
 }
 
 @media (max-width: 640px) {
+  .orderModalBackdrop {
+    padding: 8px;
+  }
+
+  .orderModalContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94vh;
+    max-height: 94dvh;
+    margin: 0 !important;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  .modalHeader {
+    padding: 12px 16px;
+  }
+
+  .modalTitle {
+    font-size: 15px;
+  }
+
+  .modalBody {
+    padding: 14px 14px 28px;
+  }
+
+  .formRowGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .formRowGrid > div:nth-child(3),
+  .formRowGrid > div:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
   .desktopOnlyTable {
     display: none !important;
   }
@@ -615,26 +589,42 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
-  .mobileLineItemCardHeader {
+  .mobileLineItemTopBar {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .mobileLineItemIndexBadge {
+  .mobileLineItemBadge {
     background: #e2e8f0;
-    color: #475569;
-    font-size: 11px;
+    color: #334155;
+    font-size: 11.5px;
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 6px;
-    margin-top: 18px;
-    flex-shrink: 0;
+    padding: 3px 8px;
+    border-radius: 5px;
   }
 
-  .mobileLineItemTitleWrap {
-    flex: 1;
-    min-width: 0;
+  .mobileLineItemRemoveBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+
+  .mobileLineItemRemoveBtn:hover {
+    background: #fecaca;
+  }
+
+  .mobileMaterialSelectWrap {
+    width: 100%;
   }
 
   .mobileLineItemFieldLabel {
@@ -648,27 +638,11 @@
   }
 
   .mobileSelectInput {
-    width: 100%;
-    font-size: 14px;
+    width: 100% !important;
+    font-size: 13.5px;
     min-height: 42px;
     padding: 6px 10px;
-  }
-
-  .mobileLineItemDeleteBtn {
-    background: #fee2e2;
-    color: #ef4444;
-    border: 1px solid #fecaca;
-    border-radius: 6px;
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 16px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-top: 16px;
-    flex-shrink: 0;
+    box-sizing: border-box;
   }
 
   .mobileLineItemCardBody {
@@ -688,16 +662,16 @@
 
   .mobileQtyInput {
     border: none !important;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    padding: 8px 10px;
+    padding: 6px 8px;
     width: 100%;
-    min-height: 40px;
+    min-height: 38px;
     box-shadow: none !important;
   }
 
   .mobileUnitTag {
-    padding: 0 10px;
+    padding: 0 8px;
     font-size: 11px;
     font-weight: 700;
     color: #64748b;
@@ -710,10 +684,10 @@
 
   .mobileLockedRate {
     width: 100%;
-    min-height: 40px;
-    padding: 8px 10px;
+    min-height: 38px;
+    padding: 6px 8px;
     justify-content: flex-start;
-    font-size: 13px;
+    font-size: 12.5px;
     background: #f1f5f9;
   }
 
@@ -735,6 +709,49 @@
     font-size: 15px;
     font-weight: 800;
     color: var(--brand-700);
+  }
+
+  .modalFooter {
+    padding: 10px 14px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    border-top: 1px solid var(--border-default);
+  }
+
+  .modalCancelBtn {
+    flex: 0 0 auto !important;
+    min-width: 80px;
+    min-height: 42px;
+    height: 42px;
+    padding: 0 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .modalSubmitBtn {
+    flex: 1 1 auto !important;
+    min-width: 0;
+    min-height: 42px;
+    height: 42px;
+    padding: 0 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    justify-content: center;
+    box-sizing: border-box;
+    white-space: nowrap;
+  }
+
+  .submitTextFull {
+    display: none;
+  }
+  .submitTextShort {
+    display: inline;
   }
 
   .supplierBanner {
@@ -763,12 +780,6 @@
 
   .orderDetailDrawer {
     width: 100%;
-  }
-
-  .orderModalContainer {
-    width: 100%;
-    max-height: 95vh;
-    margin: 8px;
   }
 
   .sectionHeaderRow {

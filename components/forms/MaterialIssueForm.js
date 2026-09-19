@@ -6,6 +6,7 @@ import Shell from "@/components/Shell";
 import { Title } from "@/components/ui/Title";
 import { fields } from "@/data/fields";
 import History from "./History";
+import { lockScroll, unlockScroll } from "@/lib/scrollLock";
 import "@/components/ui/ui.css";
 import "./material-issue.css";
 
@@ -498,12 +499,6 @@ export default function MaterialIssueForm() {
   return (
     <Shell>
       <div className="issuePageWrapper">
-        {/* Page Title & Breadcrumb header */}
-        <Title
-          title="Material Issue"
-          desc="Create issue vouchers and allocate materials from the inventory catalog."
-        />
-
         {/* Alert Notification Banner */}
         {notification.text && (
           <div className={`alertBanner ${notification.type}`}>
@@ -537,9 +532,9 @@ export default function MaterialIssueForm() {
               type="button"
               className="catalogBtn"
               onClick={() => setIsCatalogModalOpen(true)}
-              title="Open full catalog of all 93 materials"
+              title={`Open full catalog of all ${materialCatalog.length} materials`}
             >
-              <span>▦</span> Browse All Catalog ({materialCatalog.length})
+              <span>▦</span> Catalog ({materialCatalog.length})
             </button>
 
             <button
@@ -629,7 +624,7 @@ export default function MaterialIssueForm() {
               </label>
               <input
                 type="text"
-                placeholder="Type or select site destination, party name, or contractor..."
+                placeholder="Select site destination, party or contractor..."
                 value={voucherDetails.issuedTo}
                 onFocus={() => setShowPartySuggestions(true)}
                 onChange={(e) => {
@@ -682,18 +677,23 @@ export default function MaterialIssueForm() {
         <section className="searchAddSection" ref={dropdownRef}>
           <div className="cardSectionHeader">
             <h2>
-              <span>🔍</span> Add Materials to Issue Voucher
+              <span className="sectionIconCircle">🔍</span> Add Materials to Issue Voucher
             </h2>
             <span className="stepBadge active">Step 2 of 2</span>
           </div>
 
           <div className="searchBarWrapper">
-            <span className="searchIcon">🔍</span>
+            <span className="searchIcon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
             <input
               ref={searchInputRef}
               type="text"
               className="materialSearchInput"
-              placeholder="Type to search 93 materials (e.g., nipple, drill, pipe, valve, clamp, meter...)"
+              placeholder={`Search ${materialCatalog.length} materials (e.g. pipe, valve, drill, clamp...)`}
               value={searchQuery}
               onFocus={() => setIsSearchOpen(true)}
               onChange={(e) => {
@@ -710,22 +710,9 @@ export default function MaterialIssueForm() {
                   setSearchQuery("");
                   setIsSearchOpen(false);
                 }}
-                style={{
-                  position: "absolute",
-                  right: "14px",
-                  background: "#f1f5f9",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "24px",
-                  height: "24px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "12px",
-                  color: "#64748b",
-                }}
+                className="searchClearBtn"
                 title="Clear search"
+                aria-label="Clear search"
               >
                 ✕
               </button>
@@ -830,15 +817,25 @@ export default function MaterialIssueForm() {
               <span className="selectedCountBadge">{totalSelectedCount}</span>
             </div>
 
-            {totalSelectedCount > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <button
                 type="button"
-                className="clearAllBtn"
-                onClick={handleClearAll}
+                className="browseCatalogBtn"
+                onClick={() => setIsCatalogModalOpen(true)}
+                title="Open full catalog modal"
               >
-                ✕ Clear All Items
+                <span>▦</span> Catalog
               </button>
-            )}
+              {totalSelectedCount > 0 && (
+                <button
+                  type="button"
+                  className="clearAllBtn"
+                  onClick={handleClearAll}
+                >
+                  ✕ Clear All Items
+                </button>
+              )}
+            </div>
           </div>
 
           {selectedMaterials.length === 0 ? (

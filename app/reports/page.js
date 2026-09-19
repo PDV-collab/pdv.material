@@ -7,14 +7,10 @@ import { Badge } from "@/components/ui/Badge";
 import { exportToExcel } from "@/lib/exportToExcel";
 import {
   syncMasterGoogleSheet,
-  syncSupplierGoogleSheet,
-  syncAllSuppliersToGoogleSheets,
   initializeSheetStructure,
   getMasterSheetUrl,
   getWebhookUrl,
   saveSheetConfig,
-  getSupplierSheetRegistry,
-  saveSupplierSheetUrl,
 } from "@/google_sheets_sync/syncClient";
 import {
   calculateLiveInventory,
@@ -47,9 +43,7 @@ export default function ReportsPage() {
   const [webhookInput, setWebhookInput] = useState("");
   const [sheetUrlInput, setSheetUrlInput] = useState("");
 
-  // Supplier Sheets Registry State: { [code]: url }
-  const [supplierRegistry, setSupplierRegistry] = useState({});
-  const [syncingSupplierCode, setSyncingSupplierCode] = useState(null);
+
 
   useEffect(() => {
     const rawSuppliers = getStorageData(STORAGE_KEYS.SUPPLIERS, DEFAULT_SUPPLIERS);
@@ -70,10 +64,6 @@ export default function ReportsPage() {
     setSheetUrl(currentSheet);
     setSheetUrlInput(currentSheet);
     setWebhookInput(getWebhookUrl());
-
-    // Load supplier sheet mappings
-    const savedRegistry = getSupplierSheetRegistry();
-    setSupplierRegistry(savedRegistry);
   }, []);
 
   useEffect(() => {
@@ -132,69 +122,7 @@ export default function ReportsPage() {
     }
   };
 
-  const handleSupplierUrlChange = (supplierCode, newUrl) => {
-    const updated = { ...supplierRegistry, [supplierCode]: newUrl };
-    setSupplierRegistry(updated);
-    saveSupplierSheetUrl(supplierCode, newUrl);
-  };
 
-  const handleSyncSingleSupplier = async (supplierCode, supplierName) => {
-    const targetUrl = supplierRegistry[supplierCode];
-    if (!targetUrl) {
-      alert(`Please enter a Google Sheet URL for supplier ${supplierCode} before syncing.`);
-      return;
-    }
-
-    setSyncingSupplierCode(supplierCode);
-    setSyncStatus({
-      type: "info",
-      message: `Syncing isolated workspace for ${supplierName} [${supplierCode}]...`,
-    });
-
-    try {
-      const res = await syncSupplierGoogleSheet(supplierCode, supplierName);
-      setSyncStatus({
-        type: "success",
-        message: `✓ Supplier [${supplierCode}] Sheet Synced! ${res.totalReceived} records processed (${res.totalAdded} added, ${res.totalUpdated} updated) in ${res.duration}.`,
-      });
-    } catch (err) {
-      setSyncStatus({
-        type: "error",
-        message: `Failed to sync supplier [${supplierCode}]: ${err.message}`,
-      });
-    } finally {
-      setSyncingSupplierCode(null);
-    }
-  };
-
-  const handleSyncAllSuppliers = async () => {
-    const configuredCount = Object.keys(supplierRegistry).filter((k) => Boolean(supplierRegistry[k])).length;
-    if (configuredCount === 0) {
-      alert("No suppliers have registered Google Sheet URLs. Please assign sheet URLs in the table below first.");
-      return;
-    }
-
-    setSyncLoading(true);
-    setSyncStatus({
-      type: "info",
-      message: `Syncing ${configuredCount} supplier Google Sheets in parallel...`,
-    });
-
-    try {
-      const res = await syncAllSuppliersToGoogleSheets(data.suppliers);
-      setSyncStatus({
-        type: "success",
-        message: `✓ Multi-Supplier Batch Sync Complete: ${res.successful} successful, ${res.failed} failed out of ${res.totalConfigured} configured suppliers.`,
-      });
-    } catch (err) {
-      setSyncStatus({
-        type: "error",
-        message: `Bulk supplier sync error: ${err.message}`,
-      });
-    } finally {
-      setSyncLoading(false);
-    }
-  };
 
   const handleSaveConfig = (e) => {
     e.preventDefault();
@@ -417,23 +345,9 @@ export default function ReportsPage() {
         <div className="syncHubRow">
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <h2 style={{ fontSize: "16px", margin: 0 }}>Admin Master Google Sheet (Consolidated Database)</h2>
+              <h2 style={{ fontSize: "16px", margin: 0 }}>Admin Master Google Sheet</h2>
               <span className="liveBadge">Connected</span>
             </div>
-            <p style={{ fontSize: "12.5px", color: "var(--text-muted)", margin: "4px 0 0" }}>
-              Consolidates ALL operational & supplier records directly into this Master Sheet. Individual supplier sheet links are completely optional.
-            </p>
-            <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0 0" }}>
-              Master Sheet Link:{" "}
-              <a
-                href={sheetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--primary)", textDecoration: "underline", wordBreak: "break-all" }}
-              >
-                {sheetUrl}
-              </a>
-            </p>
           </div>
 
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
@@ -540,188 +454,6 @@ export default function ReportsPage() {
         )}
       </section>
 
-      {/* 2. Multi-Supplier Google Sheets Registry & Workspace Automation */}
-      <section className="card syncHubCard" style={{ marginTop: "16px" }}>
-        <div className="syncHubRow">
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <h2 style={{ fontSize: "16px", margin: 0 }}>Multi-Supplier Sheet Automation & Registry</h2>
-              <span className="pillSuccess">Data Isolation Guard</span>
-            </div>
-            <p style={{ fontSize: "12.5px", color: "var(--text-muted)", margin: "4px 0 0" }}>
-              Assign dedicated Google Sheets per supplier. The generic synchronization engine strictly enforces data isolation and updates existing rows without duplication.
-            </p>
-          </div>
-
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-secondary)" }}>
-              {Object.keys(supplierRegistry).filter((k) => Boolean(supplierRegistry[k])).length} of {data.suppliers.length} Configured
-            </span>
-            <button
-              type="button"
-              className="primary"
-              disabled={syncLoading}
-              onClick={handleSyncAllSuppliers}
-            >
-              ⚡ Sync All Supplier Sheets
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Supplier Registry Cards (hidden on desktop) */}
-        <div className="mobileCardList">
-          {data.suppliers.map((s, idx) => {
-            const code = s.code || (Array.isArray(s) ? s[0] : `SUP-${String(idx + 1).padStart(3, "0")}`);
-            const name = s.name || (Array.isArray(s) ? s[1] : `Supplier ${idx + 1}`);
-            const contact = s.contactPerson || (Array.isArray(s) ? s[2] : "—");
-            const gst = s.gst || (Array.isArray(s) ? s[5] : "—");
-            const assignedUrl = supplierRegistry[code] || "";
-            const isSyncing = syncingSupplierCode === code;
-
-            return (
-              <div key={code} className="mobileDataCard">
-                <div className="mobileCardHeader">
-                  <div className="mobileCardTitleArea">
-                    <code className="codeBadge">{code}</code>
-                    <h3 className="mobileCardTitle" style={{ marginTop: "4px" }}>{name}</h3>
-                  </div>
-                  {assignedUrl ? (
-                    <span className="pillSuccess">● Connected</span>
-                  ) : (
-                    <span className="pillWarning">○ Not Set</span>
-                  )}
-                </div>
-
-                <div className="mobileCardBody" style={{ gridTemplateColumns: "1fr" }}>
-                  <div className="mobileMetricItem">
-                    <span className="mobileMetricLabel">Contact Person / GSTIN</span>
-                    <span className="mobileMetricVal" style={{ fontSize: "12.5px" }}>
-                      {contact} · <span style={{ fontFamily: "monospace" }}>{gst}</span>
-                    </span>
-                  </div>
-                  <div style={{ marginTop: "6px" }}>
-                    <label style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
-                      Dedicated Google Sheet URL
-                    </label>
-                    <input
-                      type="url"
-                      className="sheetInput"
-                      style={{ minWidth: "100%" }}
-                      placeholder="Paste Google Sheet URL..."
-                      value={assignedUrl}
-                      onChange={(e) => handleSupplierUrlChange(code, e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="mobileCardFooter">
-                  {assignedUrl && (
-                    <a
-                      href={assignedUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-sm btn-secondary"
-                      style={{ textDecoration: "none" }}
-                    >
-                      ↗ Open Sheet
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    className="mobilePrimaryAction"
-                    disabled={!assignedUrl || isSyncing || syncLoading}
-                    onClick={() => handleSyncSingleSupplier(code, name)}
-                  >
-                    {isSyncing ? "Syncing..." : "⚡ Sync Sheet"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Suppliers Sheet Registry Table (desktop) */}
-        <div className="supplierRegistryTableWrapper">
-          <table className="supplierRegistryTable">
-            <thead>
-              <tr>
-                <th style={{ width: "100px" }}>Code</th>
-                <th>Supplier / Company</th>
-                <th>Contact & GSTIN</th>
-                <th>Dedicated Google Sheet URL</th>
-                <th style={{ width: "120px" }}>Status</th>
-                <th style={{ width: "160px", textAlign: "right" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.suppliers.map((s, idx) => {
-                const code = s.code || (Array.isArray(s) ? s[0] : `SUP-${String(idx + 1).padStart(3, "0")}`);
-                const name = s.name || (Array.isArray(s) ? s[1] : `Supplier ${idx + 1}`);
-                const contact = s.contactPerson || (Array.isArray(s) ? s[2] : "—");
-                const gst = s.gst || (Array.isArray(s) ? s[5] : "—");
-                const assignedUrl = supplierRegistry[code] || "";
-                const isSyncing = syncingSupplierCode === code;
-
-                return (
-                  <tr key={code}>
-                    <td>
-                      <b style={{ color: "var(--brand-600)" }}>{code}</b>
-                    </td>
-                    <td>
-                      <b>{name}</b>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>
-                        {contact} · <span style={{ fontFamily: "monospace" }}>{gst}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <input
-                        type="url"
-                        className="sheetInput"
-                        placeholder="Paste supplier Google Sheet URL here..."
-                        value={assignedUrl}
-                        onChange={(e) => handleSupplierUrlChange(code, e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      {assignedUrl ? (
-                        <span className="pillSuccess">● Connected</span>
-                      ) : (
-                        <span className="pillWarning">○ Not Set</span>
-                      )}
-                    </td>
-                    <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                      <div style={{ display: "inline-flex", gap: "6px" }}>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-primary"
-                          disabled={!assignedUrl || isSyncing || syncLoading}
-                          onClick={() => handleSyncSingleSupplier(code, name)}
-                          title="Upsert this supplier's orders & invoices to their dedicated sheet"
-                        >
-                          {isSyncing ? "..." : "⚡ Sync"}
-                        </button>
-                        {assignedUrl && (
-                          <a
-                            href={assignedUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-sm btn-secondary"
-                            style={{ textDecoration: "none" }}
-                            title="Open Google Spreadsheet"
-                          >
-                            ↗
-                          </a>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
       </section>
 
 

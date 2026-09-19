@@ -196,6 +196,8 @@
   text-transform: uppercase;
   background: #f1f5f9;
   color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .stepBadge.active {
@@ -345,41 +347,70 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .searchBarWrapper .searchIcon {
   position: absolute;
-  left: 16px;
-  font-size: 16px;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #94a3b8;
   pointer-events: none;
+  z-index: 2;
+  transition: color 0.18s ease;
 }
 
+.searchBarWrapper:focus-within .searchIcon {
+  color: var(--brand-600, #0f4d3c);
+}
+
+/* Explicit high specificity to override globals.css input[type="text"] */
+input[type="text"].materialSearchInput,
 .materialSearchInput {
-  width: 100%;
-  height: 48px;
-  padding: 0 90px 0 46px;
-  border: 1.5px solid var(--border-default, #e2e8f0);
-  border-radius: var(--radius-lg, 10px);
-  background: #ffffff;
-  font-size: 14px;
-  color: var(--text-primary, #0f172a);
-  outline: none;
-  transition: all 0.18s ease;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding-left: 46px !important;
+  padding-right: 88px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border: 1.5px solid var(--border-default, #cbd5e1) !important;
+  border-radius: var(--radius-lg, 12px) !important;
+  background: #ffffff !important;
+  font-size: 14.5px !important;
+  color: var(--text-primary, #0f172a) !important;
+  outline: none !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
+input[type="text"].materialSearchInput::placeholder,
+.materialSearchInput::placeholder {
+  color: #94a3b8;
+  font-size: 13.5px;
+}
+
+input[type="text"].materialSearchInput:focus,
 .materialSearchInput:focus {
-  border-color: var(--brand-500, #176b52);
-  box-shadow: 0 0 0 4px rgba(23, 107, 82, 0.12);
+  border-color: var(--brand-500, #176b52) !important;
+  box-shadow: 0 0 0 3.5px rgba(23, 107, 82, 0.14) !important;
 }
 
 .searchKeyHint {
   position: absolute;
-  right: 14px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 3px;
   pointer-events: none;
+  z-index: 2;
 }
 
 .searchKeyHint span {
@@ -391,6 +422,31 @@
   font-weight: 700;
   color: #64748b;
   font-family: inherit;
+}
+
+.searchClearBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #64748b;
+  z-index: 2;
+  transition: all 0.15s ease;
+}
+
+.searchClearBtn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 /* Category Filter Pills */
@@ -628,9 +684,9 @@
 }
 
 .clearAllBtn {
-  background: transparent;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background: #ffffff;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
   font-size: 12px;
   font-weight: 600;
   padding: 4px 12px;
@@ -641,6 +697,26 @@
 
 .clearAllBtn:hover {
   background: #fef2f2;
+}
+
+.browseCatalogBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--brand-50, #e8f4ef);
+  color: var(--brand-700, #0b3d30);
+  border: 1px solid var(--brand-200, #a7d7c7);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.browseCatalogBtn:hover {
+  background: var(--brand-100, #d1e9df);
+  border-color: var(--brand-300, #80c1ab);
 }
 
 /* Empty State Card */
@@ -1045,19 +1121,22 @@
   flex-shrink: 0;
 }
 
+input[type="text"].catalogSearchField,
 .catalogSearchField {
-  width: 100%;
-  height: 42px;
-  padding: 0 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 13.5px;
-  outline: none;
+  width: 100% !important;
+  height: 42px !important;
+  padding: 0 16px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  outline: none !important;
+  box-sizing: border-box !important;
 }
 
+input[type="text"].catalogSearchField:focus,
 .catalogSearchField:focus {
-  border-color: var(--brand-500, #176b52);
-  box-shadow: 0 0 0 3px rgba(23, 107, 82, 0.12);
+  border-color: var(--brand-500, #176b52) !important;
+  box-shadow: 0 0 0 3px rgba(23, 107, 82, 0.12) !important;
 }
 
 .catalogModalTableWrapper {
@@ -1130,18 +1209,204 @@
 }
 
 @media (max-width: 640px) {
-  .voucherGrid {
-    grid-template-columns: 1fr;
+  .issuePageWrapper {
+    gap: 14px;
+    padding-bottom: 130px;
   }
+
+  /* Header & Metrics */
+  .issueHeaderBar {
+    padding: 0 0 4px;
+    gap: 10px;
+  }
+
+  .issueHeaderLeft h1 {
+    font-size: 18px;
+    gap: 8px;
+  }
+
+  .issueHeaderLeft h1 span {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+    border-radius: 6px;
+  }
+
+  .issueHeaderLeft p {
+    font-size: 12.5px;
+    margin-top: 2px;
+  }
+
+  .issueHeaderMetrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .metricPill {
+    grid-column: 1 / -1;
+    justify-content: center;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .catalogBtn {
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Voucher Grid 2-column compact layout on mobile */
+  .voucherGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
   .voucherGrid .fieldGroup.span2,
   .voucherGrid .fieldGroup.span4 {
-    grid-column: span 1;
+    grid-column: 1 / -1;
   }
+
+  .fieldGroup label {
+    font-size: 11.5px;
+    margin-bottom: 3px;
+  }
+
+  .fieldGroup input,
+  .fieldGroup select {
+    height: 42px;
+    min-height: 42px;
+    font-size: 13.5px;
+    padding: 0 10px;
+  }
+
   .voucherCard,
   .searchAddSection,
   .selectedMaterialsCard {
-    padding: 16px;
+    padding: 14px;
+    border-radius: 10px;
   }
+
+  .cardSectionHeader {
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  .cardSectionHeader h2 {
+    font-size: 13.5px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stepBadge {
+    font-size: 10px;
+    padding: 3px 7px;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Quick Destination tags horizontal scroll */
+  .quickDestinationsWrap {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    margin-top: 6px;
+    gap: 6px;
+    scrollbar-width: none;
+  }
+
+  .quickDestinationsWrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .quickDestLabel {
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+
+  .quickDestTag {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  /* Step 2 Search Bar on Mobile */
+  .searchKeyHint {
+    display: none !important;
+  }
+
+  input[type="text"].materialSearchInput,
+  .materialSearchInput {
+    padding-left: 42px !important;
+    padding-right: 42px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    font-size: 14px !important;
+  }
+
+  .searchBarWrapper .searchIcon {
+    left: 13px;
+  }
+
+  /* Smooth swipeable horizontal pills on mobile */
+  .categoryPills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    margin-top: 10px;
+    gap: 6px;
+    scrollbar-width: none;
+  }
+
+  .categoryPills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .catPill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .recentChipsWrapper {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    margin-top: 10px;
+    gap: 6px;
+    scrollbar-width: none;
+  }
+
+  .recentChipsWrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .recentLabel {
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+
+  .recentChip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+
+  .searchDropdown {
+    max-height: 280px;
+  }
+
   .catalogModalOverlay {
     padding: 10px;
   }
